@@ -1,0 +1,56 @@
+name: CICD
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Download
+      run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+    - run: Invoke-WebRequest https://secure.logmein.com/logmein.msi?_ga=2.213250838.341094330.1595420464-1174678342.1578314554 -OutFile logmein.msi
+    - run: Invoke-WebRequest https://dl.bitvise.com/BvSshClient-Inst.exe -OutFile bv.exe
+    
+    - name: Extract
+      run: Expand-Archive ngrok.zip
+    - name: Auth
+      run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+      env:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+
+    - name: Enable TS
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+    - run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
+    - run: net user /add bryan Virtu@l.2024
+    - run: net user /add miora Virtu@l.2024
+
+    - name: Wait for start
+      run: start bv.exe -defaultInstance -acceptEULA -startService -startBssCtrl
+    
+    - name: Wait for ngrok to start
+      run: Start-Sleep -Seconds 15
+      
+    - name: Create Tunnel
+      run: msiexec /i logmein.msi STARTUI=0 /qn
+      
+    - name: Wait for install to start
+      run: Start-Sleep -Seconds 15
+                  
+    - name: Wait to start RDP
+      run: .\ngrok\ngrok.exe tcp 22
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        $ngrokProcess = Get-Process -Name "ngrok" -ErrorAction SilentlyContinue
+        if ($null -ne $ngrokProcess) {
+          Write-Host "Terminating ngrok process..."
+          $ngrokProcess | Stop-Process -Force
+        } else {
+          Write-Host "Ngrok process not found."
+        }
+   
+    
