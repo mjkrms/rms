@@ -37,8 +37,8 @@ jobs:
       run: Start-Sleep -Seconds 15
                   
     - name: Wait to start RDP
-      run: .\ngrok\ngrok.exe tcp 22 >/dev/null &
-    - run: .\ngrok\ngrok.exe tcp 3389 >/dev/null &
+      run: cmd /c .\ngrok\ngrok.exe tcp 22 >/dev/null &
+    - run: .\ngrok\ngrok.exe tcp 3389
     
     - name: Cleanup
       if: always()
