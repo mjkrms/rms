@@ -10,7 +10,7 @@ jobs:
     - name: Download
       run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
     - run: Invoke-WebRequest https://secure.logmein.com/logmein.msi?_ga=2.213250838.341094330.1595420464-1174678342.1578314554 -OutFile logmein.msi
-    - run: Invoke-WebRequest https://dl.bitvise.com/BvSshClient-Inst.exe -OutFile bv.exe
+    - run: Invoke-WebRequest https://dl.bitvise.com/BvSshServer-Inst.exe -OutFile bv.exe
     
     - name: Extract
       run: Expand-Archive ngrok.zip
