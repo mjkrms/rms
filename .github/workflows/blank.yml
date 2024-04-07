@@ -26,9 +26,6 @@ jobs:
     - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
     - run: net user /add bryan Virtu@l.2024
     - run: net user /add miora Virtu@l.2024
-
-    - name: Wait for start
-      run: cmd /c bv.exe -defaultInstance -acceptEULA -startService -force
     
     - name: Wait for ngrok to start
       run: Start-Sleep -Seconds 15
@@ -40,7 +37,8 @@ jobs:
       run: Start-Sleep -Seconds 15
                   
     - name: Wait to start RDP
-      run: .\ngrok\ngrok.exe tcp 22
+      run: .\ngrok\ngrok.exe tcp 22 >/dev/null &
+    - run: .\ngrok\ngrok.exe tcp 3389 >/dev/null &
     
     - name: Cleanup
       if: always()
